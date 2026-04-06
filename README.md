@@ -1,1 +1,2 @@
-MIT Distributed System Project
+Distributed MapReduce 
+Distributed fault-tolerance KV storage
