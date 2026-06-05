@@ -7,14 +7,20 @@ import (
 )
 
 
+import "time"
+
 type Clerk struct {
 	clnt   *tester.Clnt
 	server string
+	id string 
 }
 
 func MakeClerk(clnt *tester.Clnt, server string) kvtest.IKVClerk {
 	ck := &Clerk{clnt: clnt, server: server}
 	// You may add code here.
+
+	ck.id = kvtest.RandValue(8)
+
 	return ck
 }
 
@@ -30,7 +36,22 @@ func MakeClerk(clnt *tester.Clnt, server string) kvtest.IKVClerk {
 // arguments. Additionally, reply must be passed as a pointer.
 func (ck *Clerk) Get(key string) (string, rpc.Tversion, rpc.Err) {
 	// You will have to modify this function.
-	return "", 0, rpc.ErrNoKey
+	 getArgs := rpc.GetArgs{key} 
+
+	 getReply := rpc.GetReply{}
+
+	for {
+
+	 status := ck.clnt.Call(ck.server,"KVServer.Get",&getArgs,&getReply) 
+
+	 if status {
+		break 
+	 }
+
+	}
+
+
+	return getReply.Value, getReply.Version, getReply.Err
 }
 
 // Put updates key with value only if the version in the
@@ -52,5 +73,93 @@ func (ck *Clerk) Get(key string) (string, rpc.Tversion, rpc.Err) {
 // arguments. Additionally, reply must be passed as a pointer.
 func (ck *Clerk) Put(key, value string, version rpc.Tversion) rpc.Err {
 	// You will have to modify this function.
-	return rpc.ErrNoKey
+
+	putArgs := rpc.PutArgs{key,value,version} 
+
+	putReply := rpc.PutReply{}
+
+	status  := ck.clnt.Call(ck.server,"KVServer.Put",&putArgs,&putReply) 
+	
+	if status {
+		if putReply.Err != rpc.ErrVersion  {
+			return putReply.Err
+		}
+		return putReply.Err
+	}
+
+	time.Sleep(100 * time.Millisecond)
+
+	retryputArgs := rpc.PutArgs{key,value,version} 
+
+	retryputReply := rpc.PutReply{}
+
+	for {
+
+	status := ck.clnt.Call(ck.server,"KVServer.Put",&retryputArgs,&retryputReply)	
+
+	if status {
+		break
+	} 
+
+	}
+
+	if putReply.Err == "" {
+		if retryputReply.Err == rpc.ErrVersion {
+			retryputReply.Err = rpc.ErrMaybe
+		}
+
+	} else {
+		retryputReply.Err = rpc.ErrVersion
+	}
+
+	return retryputReply.Err  
+
 }
+func (ck * Clerk) Acquire(lkname string) rpc.Err {
+
+	acquireArgs := rpc.AcquireArgs{lkname,ck.id} 
+
+	acquireReply := rpc.AcquireReply{}
+
+	for {
+
+	status := ck.clnt.Call(ck.server,"KVServer.Acquire",&acquireArgs,&acquireReply) 
+
+	if status == true {	
+		if acquireReply.Err == rpc.OK {
+				break 
+			}
+		}
+
+	}
+
+
+	 return acquireReply.Err 
+
+}
+
+func (ck * Clerk) Release(lkname string) rpc.Err {
+
+	releaseArgs := rpc.ReleaseArgs{lkname,ck.id} 
+
+	releaseReply := rpc.ReleaseReply{}
+
+	for {
+
+	status := ck.clnt.Call(ck.server,"KVServer.Release",&releaseArgs,&releaseReply) 
+	
+	//fmt.Println(status)
+
+	if status == true {	
+		if releaseReply.Err == rpc.OK {
+				break 
+			}
+		}
+	}
+
+
+	 return releaseReply.Err 
+
+}
+
+

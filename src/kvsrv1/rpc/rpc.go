@@ -11,6 +11,10 @@ const (
 	// Err returned by Clerk only
 	ErrMaybe = "ErrMaybe"
 
+	ErrAcquire = "ErrAcquire"
+
+	ErrRelease = "ErrRelease"
+
 	// For future kvraft lab
 	ErrWrongLeader = "ErrWrongLeader"
 	ErrWrongGroup  = "ErrWrongGroup"
@@ -36,5 +40,25 @@ type GetReply struct {
 	Value   string
 	Version Tversion
 	Err     Err
+}
+
+
+type AcquireArgs struct {
+	Lock_name string 
+	ClientId string 
+}
+
+type AcquireReply struct {
+	Err Err 
+}
+
+
+type ReleaseArgs struct {
+	Lock_name string 
+	ClientId string 
+}
+
+type ReleaseReply struct {
+	Err Err 
 }
 
