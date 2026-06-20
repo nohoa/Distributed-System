@@ -9,7 +9,7 @@ A collection of distributed systems projects implementing core distributed compu
 | MapReduce Framework            | ✅ Completed   |
 | Raft Leader Election           | ✅ Completed   |
 | Raft Log Replication           | ✅ Completed   |
-| Raft Persistence               | ⬜ In Progress |
+| Raft Persistence               | ✅ In Progress |
 | Fault-Tolerant Key/Value Store | ✅ Completed   |
 | Shard Controller               | ⬜ Not Started |
 | Sharded Key/Value Store        | ⬜ Not Started |
@@ -150,7 +150,7 @@ All client requests are replicated through Raft before execution.
 
 ---
 
-# ⬜ Persistence
+# ✅ Persistence
 
 Planned features:
 
@@ -214,6 +214,6 @@ go test
 * ✅ Raft leader election completed
 * ✅ Raft log replication completed
 * ✅ Fault-tolerant key/value store completed
-* ⬜ Persistence not implemented
+* ✅ Persistence not implemented
 * ⬜ Shard controller not implemented
 * ⬜ Sharded key/value store not implemented
